@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>My Solar Calculator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☀️</text></svg>">
+<style>
+:root{--navy:#142D50;--pri:#2563EB;--bg:#F3F4F6;--card:#fff;--tx:#1F2937;--mut:#6b7280;--bd:#e5e7eb;--gr:#15803d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b2d;--card:#172840;--tx:#e5e7eb;--mut:#9ca3af;--bd:#2a3f5e;--gr:#4ade80;color-scheme:dark}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 "Segoe UI",Roboto,system-ui,sans-serif;background:var(--bg);color:var(--tx)}
+header{background:var(--navy);color:#fff;padding:10px 16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+header b{font-size:18px;margin-right:8px}nav{display:flex;gap:4px;flex-wrap:wrap;flex:1}
+nav button{background:none;border:0;color:#cbd5e1;padding:8px 12px;border-radius:8px;font:inherit;cursor:pointer}nav button.on{background:var(--pri);color:#fff}
+main{padding:16px;max-width:1200px;margin:auto}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin-bottom:14px}
+.grid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+.kpi{font-size:22px;font-weight:700;color:var(--pri)}.mut{color:var(--mut);font-size:13px}.g{color:var(--gr);font-weight:600}
+button.b,a.b{background:var(--pri);color:#fff;border:0;border-radius:8px;padding:9px 14px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+button.s{background:var(--bg);color:var(--tx);border:1px solid var(--bd);border-radius:8px;padding:6px 10px;font:inherit;cursor:pointer}
+input,select,textarea{font:inherit;padding:8px;border:1px solid var(--bd);border-radius:8px;background:var(--card);color:var(--tx);width:100%}
+label{display:block;font-size:13px;color:var(--mut)}.f{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}
+.two{display:grid;gap:14px;grid-template-columns:2fr 1fr}@media(max-width:900px){.two{grid-template-columns:1fr}}
+.sticky{position:sticky;top:70px;align-self:start}
+.w{overflow-x:auto}table{width:100%;border-collapse:collapse}th,td{padding:7px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:middle}td input{min-width:70px}
+.tag{font-size:12px;padding:2px 8px;border-radius:99px;background:var(--bg);border:1px solid var(--bd)}
+.tot{display:flex;justify-content:space-between;padding:4px 0}.tot.big{font-weight:700;font-size:17px;border-top:2px solid var(--pri);margin-top:6px;padding-top:8px}
+#pv{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:20;overflow:auto;padding:12px}
+#pv .bar{max-width:800px;margin:0 auto 8px;display:flex;gap:8px;flex-wrap:wrap}
+.paper{background:#fff;color:#111;max-width:800px;margin:auto;padding:28px;border-top:8px solid var(--pri)}
+.paper table td,.paper table th{border:1px solid #cbd5e1}.paper th{background:#142D50;color:#fff}.paper h2{color:#142D50;text-align:center;margin:4px}
+dialog{border:1px solid var(--bd);border-radius:12px;background:var(--card);color:var(--tx);max-width:460px}
+@media print{body>*:not(#pv){display:none!important}#pv{display:block!important;position:static;background:none;padding:0}#pv .bar{display:none}.paper{border-top:8px solid #2563EB}@page{size:A4;margin:12mm}}
+#wt{display:flex;gap:8px;margin-bottom:12px}#wt button{flex:1;padding:12px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx);font:inherit;font-weight:600;cursor:pointer}#wt button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+.bd{display:inline-block;min-width:20px;padding:0 6px;border-radius:99px;background:#16a34a;color:#fff;font-size:12px;margin-left:6px}.bd:empty{display:none}.pulse{animation:pl .6s}@keyframes pl{50%{transform:scale(1.5)}}
+#ws[data-t=cat] #cr,#ws[data-t=calc] #cl{display:none}
+#cr .two{display:flex;flex-direction:column;gap:14px}#cr .sticky{position:static;order:-1}#cr td input{min-width:60px}
+#tst{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:99px;z-index:30;display:none}
+#ht{color:#86efac}
+@media(min-width:900px) and (orientation:landscape){main.wide{max-width:none}#ws{display:grid;grid-template-columns:3fr 2fr;gap:14px;align-items:start}#wt{display:none}#ws #cr,#ws #cl{display:block!important}#cr{position:sticky;top:64px;max-height:calc(100vh - 78px);overflow:auto}}
+</style></head><body>
+<header><b>☀️ My Solar Calculator</b><nav id="nav"></nav>
+<b id="ht"></b><select id="mode" style="width:auto" title="Katalog harga"><option>B2C</option><option>B2B</option></select></header>
+<main id="m"></main><div id="pv"></div><dialog id="dlg"></dialog><div id="tst"></div>
+<script>
+const D=`FSI-PV-FB|FSI Bifacial 520/650 W Full Black|Panel|2.7|1.8
+FSI-PV-500UB|FSI Ultra Black 500 W|Panel|2.9|1.9
+DEY-HY-5K-LV|Hybrid DEYE 1 Phase 5 kW LV|Inverter Hybrid|27.5|18.6
+FSI-HY-6K-LV|Hybrid FSI 1 Phase 6/8 kW LV|Inverter Hybrid|22.4|15.1
+FSI-HY-10K-LV|Hybrid FSI 1 Phase 10 kW LV|Inverter Hybrid|46.2|31.2
+FSI-HY-10K-3P|Hybrid FSI 10 kW 3 Phase LV|Inverter Hybrid|41.4|22.3
+DEY-HY-12K-3P|Hybrid DEYE 12 kW 3 Phase LV|Inverter Hybrid|62.9|42.4
+FSI-HY-12K-3P|Hybrid FSI 12 kW 3 Phase LV|Inverter Hybrid|49.7|33.6
+DEY-HY-15K-3P|Hybrid DEYE 15 kW 3 Phase LV|Inverter Hybrid|76.2|51.4
+FSI-HY-15K-3P|Hybrid FSI 15 kW 3 Phase LV|Inverter Hybrid|53.0|35.8
+DEY-HY-20K-HV|Hybrid DEYE 20 kW 3 Phase HV|Inverter Hybrid|98.8|66.7
+FSI-HY-30K-HV|Hybrid FSI 30 kW 3 Phase HV|Inverter Hybrid|71.1|48.0
+FSI-HY-50K-HV|Hybrid FSI 50 kW 3 Phase HV|Inverter Hybrid|97.8|66.0
+FSI-HY-80K-HV|Hybrid FSI 80 kW 3 Phase HV|Inverter Hybrid||
+FSI-OG-5K|On-Grid FSI 1 Phase 5 kW|Inverter On-Grid|10.5|7.1
+FSI-OG-8K|On-Grid FSI 1 Phase 8 kW|Inverter On-Grid|13.6|9.2
+FSI-OG-10K|On-Grid FSI 1 Phase 10 kW|Inverter On-Grid|17.6|11.8
+FSI-OG-10K-230|On-Grid FSI 3 Phase 10 kW (230V)|Inverter On-Grid|23.5|15.9
+FSI-OG-12K-230|On-Grid FSI 3 Phase 12 kW (230V)|Inverter On-Grid|27.2|18.3
+FSI-OG-20K-230|On-Grid FSI 3 Phase 20 kW (230V)|Inverter On-Grid|43.5|29.4
+FSI-OG-30K-230|On-Grid FSI 3 Phase 30 kW (230V)|Inverter On-Grid|52.4|35.4
+FSI-OG-50K-230|On-Grid FSI 3 Phase 50 kW (230V)|Inverter On-Grid|80.1|54.1
+DEY-OG-10K-380|On-Grid DEYE 3 Phase 10 kW (380V)|Inverter On-Grid|16.3|11.0
+DEY-OG-12K-380|On-Grid DEYE 3 Phase 12 kW (380V)|Inverter On-Grid|17.2|11.6
+FSI-OG-15K-380|On-Grid FSI 3 Phase 15 kW (380V)|Inverter On-Grid|21.1|14.3
+FSI-OG-20K-380|On-Grid FSI 3 Phase 20 kW (380V)|Inverter On-Grid|23.5|15.9
+FSI-OG-50K-380|On-Grid FSI 3 Phase 50 kW (380V)|Inverter On-Grid|49.0|33.1
+FSI-OG-100K-380|On-Grid FSI 3 Phase 100 kW (380V)|Inverter On-Grid|80.1|54.1
+DEY-OG-130K-380|On-Grid DEYE 3 Phase 130 kW (380V)|Inverter On-Grid|122.0|82.3
+FSI-BB-1P|Box Back Up 1 Phase AC/DC|Backup Box|6.8|4.6
+FSI-BB-3P|Box Back Up 3 Phase AC/DC|Backup Box|13.2|8.9
+FSI-LFP12-50|LFP 12V / 50 Ah|Baterai|3.1|2.1
+FSI-LFP12-100|LFP 12V / 100 Ah|Baterai|5.1|3.4
+FSI-LFP12-150|LFP 12V / 150 Ah|Baterai|8.1|5.4
+FSI-LFP12-200|LFP 12V / 200 Ah|Baterai|9.8|6.6
+FSI-LFP12-280|LFP 12V / 280 Ah|Baterai|10.4|7.0
+FSI-LFP12-314|LFP 12V / 314 Ah|Baterai|11.1|7.5
+FSI-LFP12-400|LFP 12V / 400 Ah|Baterai|17.7|11.9
+FSI-LFP24-100|LFP 24V / 100 Ah|Baterai|9.3|6.3
+FSI-LFP24-150|LFP 24V / 150 Ah|Baterai|14.3|9.7
+FSI-LFP24-200|LFP 24V / 200 Ah|Baterai|17.7|12.0
+FSI-BAT-15K|Battery FSI Lithium 15 kW|Baterai|41.4|28.8
+FSI-BAT-5K|Battery FSI Lithium Rack 5 kW|Baterai|15.4|10.4
+FSI-CAB-250-260|Cabinet 250 kW Inverter + 260 kW Battery|Cabinet|1356.3|915.5
+FSI-MI-500|Micro-inverter 500 W|Micro-Inverter|2.7|1.9
+FSI-MI-1000|Micro-inverter 1000 W|Micro-Inverter|4.0|2.7
+FSI-PB-01|Plastic Bac|Plug & Play|0.828|0.558
+FSI-RB-01|Rails Balcony|Plug & Play|1.4|0.918
+FSI-CS-01|Connected Socket|Plug & Play|0.45|0.306
+FSI-EX5M|Extension / Rallonge 5 m|Plug & Play|0.576|0.396
+FSI-INV25-BAT2|Inverter 2.5 kW + Battery 2 kW|Plug & Play|35.2|23.8
+FSI-BAT2-ADD|Additional Battery 2 kW Socket|Plug & Play|17.8|12.0
+FSI-KIT-2P|Kit Plug & Play (2 panel + 4 plastic bac + 1 battery 2 kW, 1 inverter 2.5 kW + delivery + installation + warranty)|Plug & Play|69.0|46.6
+FSI-KIT-5P|Kit Plug & Play (5 panel + 10 plastic bac + 1 inverter 2.5 kW + 1 battery 2 kW + delivery + installation + warranty)|Plug & Play|92.4|62.4
+FSI-CP-12P|Aluminium Carport Structure Black 12 Panels|Carport|58.0|39.2
+FSI-EV-22K|EV Charging 22 kW / 2 Cars|EV Charger|29.8|20.1
+FSI-EV-7K7|EV Charging 7.7 kW / 1 Car|EV Charger|8.7|5.9
+FSI-AC-CON|AC Connector|EV Charger|16.8|11.3
+FSI-PLN|Instalasi Meter PLN|Layanan|6.6|
+FSI-GRD|Grounding|Layanan|2.2|`;
+const BD=[["BDC","30-S|215.1|145.2 40-S|228.0|152.9 60-S|252.7|170.5 90-S|279.9|188.9 120-S|318.8|215.2 150-S|353.3|238.5 180-S|387.9|261.8 240-S|457.0|308.5","BDC Slow Charging (AC)"],
+["BEDC","60-C|192.2|129.6 80-C|215.1|145.2 90-C|226.8|153.0 120-C|258.3|174.3 150-O|278.6|188.0 160-O|289.4|195.3 180-O|317.5|214.3 200-O|341.2|230.3 240-O|367.2|247.8","EU Fast Charging"],
+["BDC","60-O|282.9|190.9 80-O|314.4|212.2 90-O|330.4|223.0 120-O|368.0|248.4 150-O|403.9|272.6 160-O|421.2|284.3 180-O|440.6|297.4 210-O|496.8|335.3 240-O|540.0|364.5","BDC DC Fast Charging"]];
+const J=v=>v===''||v==null?null:Math.round(+v*1e6);
+function seed(){const r=[];const add=(s,n,c,a,b)=>r.push({sku:s,name:n,cat:c,b2c:J(a),b2b:J(b),cost:null,custom:null,active:true});
+D.split('\n').forEach(l=>{const p=l.split('|');add(p[0],p[1],p[2],p[3],p[4])});
+BD.forEach(([pre,s,c])=>s.split(' ').forEach(x=>{const p=x.split('|');add(pre+'-'+p[0].replace('-',''),pre+' '+p[0],c,p[1],p[2])}));return r}
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt=n=>(S.set.cur||'')+Math.round(n||0).toLocaleString(S.set.loc||'id-ID');
+let S;try{S=JSON.parse(localStorage.getItem('msc'))}catch(e){}
+S=S||{products:seed(),projects:[],seq:0,set:{inst:1800,str:1800,tariff:1800,esc:4,wp:520,disc:0,co:'FSI',terms:'Harga berlaku 14 hari sejak tanggal penawaran. Pembayaran: DP 50%, pelunasan setelah instalasi. Estimasi penghematan bukan jaminan dan bergantung pada pemakaian listrik serta kondisi cuaca.'}};
+S.set={cur:'Rp',loc:'id-ID',mg:25,coaddr:'',cophone:'',foot:'',...S.set};if(!Array.isArray(S.products)||!S.products.length)S.products=seed();S.qs=S.qs||[];S.ph=S.ph||[];S.cats=S.cats||[];
+let save=()=>{try{localStorage.setItem('msc',JSON.stringify(S))}catch(e){toast('Gagal menyimpan: penyimpanan browser penuh')}};
+const np=()=>({id:null,name:'',cust:'',phone:'',addr:'',type:'Hybrid tanpa Baterai',va:'',bill:2000000,tariff:S.set.tariff,pct:50,esc:S.set.esc,wp:S.set.wp,instR:S.set.inst,strR:S.set.str,instM:'',strM:'',addI:0,addS:0,disc:S.set.disc,items:[],status:'Draft',notes:''});
+let C=np(),V='dash',mode='B2C';
+const P=k=>S.products.find(p=>p.sku===k);
+const price=(p,m)=>p?(m==='B2B'?p.b2b:p.b2c):null;
+const unit=(it,m)=>it.price!=null&&it.price!==''?+it.price:(P(it.sku)?.custom??price(P(it.sku),m));
+function calc(c=C,m=mode){let prod=0,cost=0,pq=0,miss=0;
+const rows=c.items.map(it=>{const p=P(it.sku)||{},u=unit(it,m),q=+it.qty||0;if(u==null)miss++;const t=q*(u||0);prod+=t;cost+=q*(p.cost??p.b2b??0);if(p.cat==='Panel')pq+=q;return{c:p.cat||'-',s:p.name||it.sku,sku:it.sku,q,u:u||0,t}});
+const ia=pq*c.wp*c.instR,sa=pq*c.wp*c.strR,inst=(c.instM!==''?+c.instM:ia)+ +c.addI,str=(c.strM!==''?+c.strM:sa)+ +c.addS;
+const inv=Math.max(0,prod+inst+str-(+c.disc||0)),mon=(+c.bill||0)*(+c.pct||0)/100,roi=inv?mon*12/inv*100:0;
+let cum=0,y=0,s=mon*12,prev=0,ys=0,yr=[];while(mon>0&&inv>0&&cum<inv&&y<40){prev=cum;ys=s;y++;cum+=s;yr.push([y,s,cum]);s*=1+(+c.esc||0)/100}
+const pb=mon>0&&inv>0&&cum>=inv?(y-1)+(inv-prev)/ys:null;const tc=cost+inst+str;
+return{rows,prod,pq,kwp:pq*c.wp/1000,inst,str,inv,mon,roi,yr,pb,miss,tc,gp:inv-tc,pm:inv?(inv-tc)/inv*100:0}}
+const pbT=x=>x==null?'—':Math.floor(x)+' tahun '+Math.round((x%1)*12)+' bulan';
+function view(v){if(v==='cat'||v==='calc')v='work';V=v;$('#m').className='';$('#nav').innerHTML=[['dash','Dashboard'],['work','Katalog & Kalkulator'],['proj','Proyek'],['man','Manage']].map(([k,n])=>`<button class="${V===k?'on':''}" onclick="view('${k}')">${n}</button>`).join('');({dash,work,proj,man})[v]()}
+$('#mode').onchange=e=>{mode=e.target.value;view(V)};
+function dash(){const ps=S.projects,q=ps.filter(p=>p.snap),n=ps.length||1;const a=ps.map(p=>p.snap||{inv:0,roi:0});
+const sum=(f)=>ps.reduce((x,p)=>x+(p.snap?f(p.snap):0),0),pbs=q.filter(p=>p.snap.pb!=null);
+$('#m').innerHTML=`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px"><button class="b" onclick="C=np();view('calc')">Proyek Baru</button><button class="b" onclick="view('cat')">Katalog Produk</button><button class="b" onclick="view('man')">Kelola Harga</button></div>
+<div class="grid">${[['Total proyek',ps.length],['Total penawaran',S.qs.length||q.length],['Estimasi investasi',fmt(sum(s=>s.inv))],['Estimasi hemat/tahun',fmt(sum(s=>s.mon*12))],['Rata-rata ROI',q.length?(sum(s=>s.roi)/q.length).toFixed(1)+'%':'—'],['Rata-rata payback',pbs.length?pbT(pbs.reduce((x,p)=>x+p.snap.pb,0)/pbs.length):'—']].map(([a,b])=>`<div class="card"><div class="mut">${a}</div><div class="kpi">${b}</div></div>`).join('')}</div>
+<div class="card"><b>Proyek terbaru</b>${plist(ps.slice(-5).reverse())}</div><div class="card"><b>Penawaran terbaru</b>${S.qs.slice(-5).reverse().map(x=>`<div class="tot"><span>${x.no} · ${esc(x.snap.cust)}</span><span><b>${fmt(x.snap.inv)}</b> <button class="s" onclick="show(S.qs.find(q=>q.no==='${x.no}').snap)">Lihat</button></span></div>`).join('')||'<p class="mut">Belum ada penawaran.</p>'}</div>`}
+function plist(ps){return ps.length?`<div class="w"><table><tr><th>ID</th><th>Proyek</th><th>Customer</th><th>Harga</th><th>Investasi</th><th>ROI</th><th>Payback</th><th>Status</th></tr>${ps.map(p=>`<tr><td>${p.id}</td><td>${esc(p.name)}</td><td>${esc(p.cust)}</td><td>${p.mode}</td><td>${p.snap?fmt(p.snap.inv):'—'}</td><td>${p.snap?p.snap.roi.toFixed(1)+'%':'—'}</td><td>${p.snap?pbT(p.snap.pb):'—'}</td><td>${p.status}</td></tr>`).join('')}</table></div>`:'<p class="mut">Belum ada proyek. Mulai dari “Proyek Baru”.</p>'}
+let q='',cf='',so='n';
+function cat(){const cs=[...new Set(S.products.map(p=>p.cat))];
+$('#cl').innerHTML=`<div class="f card"><div><label>Cari nama / SKU</label><input id="q" value="${esc(q)}"></div><div><label>Kategori</label><select id="cf"><option value="">Semua</option>${cs.map(c=>`<option ${c===cf?'selected':''}>${c}</option>`)}</select></div><div><label>Urutkan</label><select id="so"><option value="n">Nama</option><option value="a" ${so=='a'?'selected':''}>Harga terendah</option><option value="d" ${so=='d'?'selected':''}>Harga tertinggi</option></select></div></div><div style="display:flex;gap:8px;margin-bottom:10px">${['B2C','B2B'].map(x=>`<button class="${x===mode?'b':'s'}" style="flex:1;padding:11px" onclick="setM('${x}')">Katalog ${x}</button>`).join('')}</div><div class="grid" id="g"></div>`;
+const draw=()=>{q=$('#q').value;cf=$('#cf').value;so=$('#so').value;let l=S.products.filter(p=>p.active&&(!cf||p.cat===cf)&&(p.name+p.sku).toLowerCase().includes(q.toLowerCase()));
+l.sort((a,b)=>so==='n'?a.name.localeCompare(b.name):((price(a,mode)??1e12)-(price(b,mode)??1e12))*(so==='a'?1:-1));
+$('#g').innerHTML=l.map(p=>{const v=price(p,mode);return`<div class="card" style="margin:0">${p.img?`<img src="${p.img}" style="width:100%;height:110px;object-fit:contain" onclick="det('${p.sku}')">`:''}<span class="tag">${esc(p.cat)}</span> <span class="tag" style="${p.av&&p.av!=='Tersedia'?'color:#b45309':''}">${p.av||'Tersedia'}</span><h4 style="margin:6px 0;cursor:pointer" onclick="det('${p.sku}')">${esc(p.name)}</h4><div class="mut">${esc(p.sku)}${p.spec?' · '+esc(p.spec):''}</div><div class="kpi">${v==null?'<span class="mut" style="font-size:14px">Harga belum tersedia</span>':fmt(p.custom??v)}</div>${(C.items.find(i=>i.sku===p.sku)||{}).qty?`<div class="g">✓ ${C.items.find(i=>i.sku===p.sku).qty} di proyek</div>`:''}<div style="display:flex;gap:6px;margin-top:8px"><input id="cq_${p.sku}" type="number" min="1" value="1" style="width:62px"><button class="b" style="flex:1" onclick="addI('${p.sku}',+$('#cq_${p.sku}').value)">Tambah</button></div></div>`}).join('')||'<p>Tidak ada produk.</p>'};
+['q','cf','so'].forEach(i=>$('#'+i).oninput=draw);window.rd=draw;draw()}
+function det(k){const p=P(k);$('#dlg').innerHTML=`<h3>${esc(p.name)}</h3>${p.img?`<img src="${p.img}" style="max-width:100%;max-height:160px">`:''}<p class="mut">${esc(p.sku)} · ${esc(p.cat)} · ${p.av||'Tersedia'}</p><p>${esc(p.spec||'')} ${esc(p.desc||'')}</p><p>B2B: <b>${p.b2b==null?'Price Not Available':fmt(p.b2b)}</b><br>B2C: <b>${p.b2c==null?'Price Not Available':fmt(p.b2c)}</b></p><label>Jumlah</label><input id="dq" type="number" min="1" value="1"><div style="margin-top:10px;display:flex;gap:8px"><button class="b" onclick="addI('${k}',+$('#dq').value);$('#dlg').close()">Tambah ke Proyek</button><button class="s" onclick="$('#dlg').close()">Tutup</button></div>`;$('#dlg').showModal()}
+function addI(k,n=1){n=Math.max(1,Math.floor(n)||1);const e=C.items.find(i=>i.sku===k);e?e.qty+=n:C.items.push({sku:k,qty:n,price:null});toast(P(k).name+' ditambahkan');if($('#it'))ritems();upd(1);if($('#g'))rd()}
+const fld=(k,l,t='text')=>`<div><label>${l}</label><input data-k="${k}" type="${t}" ${t==='number'?'min="0" step="any"':''} value="${esc(C[k])}"></div>`;
+function rcalc(){$('#cr').innerHTML=`<div class="two"><div>
+<div class="card"><b>Informasi Proyek</b> <span class="tag">${mode}</span><div class="f" style="margin-top:8px">${fld('name','Nama proyek')}${fld('cust','Nama customer')}${fld('phone','Telepon')}${fld('addr','Alamat')}${fld('va','Daya PLN (VA)','number')}${fld('bill','Tagihan listrik/bulan (Rp)','number')}${fld('tariff','Tarif (Rp/kWh)','number')}<div><label>Tipe sistem</label><select data-k="type">${['Hybrid dengan Baterai','Hybrid tanpa Baterai','On-Grid','Off-Grid'].map(t=>`<option ${t===C.type?'selected':''}>${t}</option>`)}</select></div></div></div>
+<div class="card"><b>Produk (RAB)</b><div style="margin:8px 0">Baterai: ${[['Tanpa Baterai',0],['5 kWh',5],['10 kWh',10],['15 kWh',15],['Lainnya',-1]].map(([l,n])=>`<button class="s" onclick="setB(${n})">${l}</button>`).join(' ')}</div><div style="margin:8px 0"><select id="ad" style="width:70%">${S.products.filter(p=>p.active).map(p=>`<option value="${p.sku}">${esc(p.name)} (${p.sku})</option>`)}</select> <button class="b" onclick="addI($('#ad').value);ritems()">Tambah</button></div><div class="w" id="it"></div><p class="mut">Pilih baterai di daftar untuk sistem dengan baterai; tanpa baterai = Rp0. Panel dihitung otomatis dari item kategori Panel.</p></div>
+<div class="card"><b>Instalasi &amp; Struktur Aluminium</b><div style="margin:8px 0">Watt panel: ${[500,520,550,580,600,620,650].map(w=>`<button class="s" onclick="setWp(${w})">${w}</button>`).join(' ')}</div><div class="f">${fld('wp','Watt panel (Wp)','number')}${fld('instR','Tarif instalasi (Rp/Wp)','number')}${fld('instM','Instalasi manual (kosong = otomatis)','number')}${fld('addI','Biaya instalasi tambahan','number')}${fld('strR','Tarif struktur (Rp/Wp)','number')}${fld('strM','Struktur manual (kosong = otomatis)','number')}${fld('addS','Biaya struktur tambahan','number')}${fld('disc','Diskon (Rp)','number')}</div></div>
+<div class="card"><b>Penghematan</b><div class="f" style="margin-top:8px">${fld('pct','Penghematan listrik (%)','number')}${fld('esc','Kenaikan tarif/tahun (%)','number')}</div></div></div>
+<div class="sticky"><div class="card" id="rs"></div></div></div>`;
+document.querySelectorAll('[data-k]').forEach(i=>i.oninput=()=>{const k=i.dataset.k;C[k]=i.type==='number'?(i.value===''?'':Math.max(0,+i.value)):i.value;tot()});ritems()}
+function ritems(){const r=calc().rows;$('#it').innerHTML=C.items.length?`<table><tr><th>Komponen</th><th>Spesifikasi</th><th>Qty</th><th>Harga satuan</th><th>Total</th><th></th></tr>${C.items.map((it,i)=>`<tr><td>${esc(r[i].c)}</td><td>${esc(r[i].s)}</td><td><input type="number" min="1" value="${it.qty}" oninput="C.items[${i}].qty=Math.max(0,Math.floor(+this.value)||0);tot()"></td><td><input type="number" min="0" placeholder="${r[i].u}" value="${it.price??''}" oninput="C.items[${i}].price=this.value===''?null:Math.max(0,+this.value);tot()"></td><td id="t${i}">${fmt(r[i].t)}</td><td><button class="s" onclick="C.items.splice(${i},1);ritems()">✕</button></td></tr>`).join('')}</table>`:'<p class="mut">Belum ada produk. Tambahkan dari daftar di atas atau dari Katalog.</p>';tot()}
+function tot(){upd();const c=calc();c.rows.forEach((r,i)=>{const e=$('#t'+i);if(e)e.textContent=fmt(r.t)});const e=$('#rs');if(!e)return;
+e.innerHTML=`<b>Ringkasan</b> <span class="tag">${mode}</span><div class="mut">Kapasitas: ${c.pq} × ${C.wp} Wp = ${(c.kwp).toFixed(2)} kWp</div>
+<div class="tot"><span>Produk</span><span>${fmt(c.prod)}</span></div><div class="tot"><span>Instalasi</span><span>${fmt(c.inst)}</span></div><div class="tot"><span>Struktur Aluminium</span><span>${fmt(c.str)}</span></div><div class="tot"><span>Diskon</span><span>-${fmt(C.disc)}</span></div><div class="tot big"><span>Total Investasi</span><span>${fmt(c.inv)}</span></div>
+${c.miss?'<p style="color:#dc2626">⚠ '+c.miss+' item belum punya harga di katalog '+mode+'. Isi harga manual.</p>':''}${wr(c)}
+<div class="tot"><span>Hemat/bulan</span><span class="g">${fmt(c.mon)}</span></div><div class="tot"><span>ROI tahun 1</span><span class="g">${c.roi.toFixed(1)}%</span></div><div class="tot"><span>Payback</span><span class="g">${pbT(c.pb)}</span></div>
+<details><summary class="mut">Internal (tidak masuk penawaran)</summary><div class="tot"><span>Total modal</span><span>${fmt(c.tc)}</span></div><div class="tot"><span>Gross profit</span><span>${fmt(c.gp)}</span></div><div class="tot"><span>Margin</span><span>${c.pm.toFixed(1)}%</span></div><div class="tot"><span>Harga saran @${S.set.mg}%</span><span>${fmt(c.tc/(1-S.set.mg/100))}</span></div></details>
+<div style="display:grid;gap:8px;margin-top:10px"><button class="b" onclick="quote(true)">Simpan Penawaran</button><button class="s" onclick="quote(false)">Preview / PDF</button></div>`}
+function snap(){const c=calc();return{...c,mode,type:C.type,cust:C.cust,phone:C.phone,addr:C.addr,va:C.va,name:C.name,wp:C.wp,instR:C.instR,strR:C.strR,disc:+C.disc||0,pct:C.pct,esc:C.esc,tariff:C.tariff,bill:C.bill,date:new Date().toLocaleDateString('id-ID',{day:'numeric',month:'long',year:'numeric'}),no:C.qno||'DRAFT'}}
+function quote(sv){const err=calc().pq<1?'Tambahkan minimal 1 panel surya.':!C.name||!C.items.length||calc().inv<=0?'Isi nama proyek, tambahkan produk, dan pastikan harga terisi.':calc().miss?'Ada item tanpa harga.':'';if(err)return alert(err);
+if(sv){if(!C.id){C.id='PRJ-'+String(++S.seq).padStart(3,'0')}C.qno='QT-'+new Date().getFullYear()+'-'+C.id.slice(4)+'-'+String(S.qs.filter(x=>x.pid===C.id).length+1).padStart(2,'0');if(C.status==='Draft')C.status='Quotation Created';const s=snap();S.qs.push({pid:C.id,no:C.qno,snap:s});const o={...JSON.parse(JSON.stringify(C)),mode,snap:s};const i=S.projects.findIndex(p=>p.id===C.id);i<0?S.projects.push(o):S.projects[i]=o;save();alert('Penawaran tersimpan: '+C.qno)}show(snap())}
+function show(s){const L=[...s.rows.map(r=>[r.c,`${r.q} × ${fmt(r.u)}${r.s?' — '+r.s:''}`,r.t]),...(s.rows.some(r=>r.c==='Baterai')?[]:[['Baterai','Tanpa Baterai (0 kWh)',0]]),['Biaya Instalasi',`${s.pq} Panel × ${s.wp} Wp × ${fmt(s.instR)}`,s.inst],['Struktur Aluminium',`${s.pq} Panel × ${s.wp} Wp × ${fmt(s.strR)}`,s.str]];if(s.disc)L.push(['Diskon','',-s.disc]);
+const wa='https://wa.me/?text='+encodeURIComponent(`Penawaran PLTS ${s.name} untuk ${s.cust}\nTotal investasi ${fmt(s.inv)}\nROI tahun 1 ${s.roi.toFixed(1)}%, payback ${pbT(s.pb)}\nNo: ${s.no}`);
+$('#pv').style.display='block';$('#pv').innerHTML=`<div class="bar"><button class="b" onclick="print()">Cetak / Simpan PDF</button><a class="b" target="_blank" href="${wa}">WhatsApp</a><button class="s" onclick="$('#pv').style.display='none'">Tutup</button></div>
+<div class="paper"><div style="display:flex;justify-content:space-between"><div>${S.set.logo?`<img src="${S.set.logo}" style="height:40px"><br>`:''}<b style="color:#2563EB;font-size:20px">${esc(S.set.co)}</b><div style="font-size:12px">${esc(S.set.coaddr)}<br>${esc(S.set.cophone)}</div></div><span>No: ${esc(s.no)}<br>${s.date}</span></div>
+<h2>PENAWARAN PANEL SURYA UNTUK ${esc((s.cust||'').toUpperCase())}</h2><p style="text-align:center;margin:0 0 12px">(${esc(s.type)}) — ${esc(s.name)}<br>Sistem ${s.kwp.toFixed(2)} kWp</p><p style="font-size:13px"><b>Customer:</b> ${esc(s.cust)} · ${esc(s.phone||'')}<br><b>Alamat:</b> ${esc(s.addr||'')}${s.va?' · '+s.va+' VA':''}</p>
+<table><tr><th>Komponen / Indikator</th><th>Spesifikasi / Rincian</th><th style="text-align:right">Total Harga</th></tr>${L.map(r=>`<tr><td>${esc(r[0])}</td><td>${esc(r[1])}</td><td style="text-align:right">${fmt(r[2])}</td></tr>`).join('')}<tr style="font-weight:700;background:#e8f0fe"><td colspan="2">TOTAL INVESTASI</td><td style="text-align:right">${fmt(s.inv)}</td></tr>
+<tr><td>ROI Tahun Pertama</td><td>${fmt(s.mon*12)} / ${fmt(s.inv)}</td><td style="text-align:right">${s.roi.toFixed(1)}%</td></tr><tr><td>Payback Period</td><td>Akumulasi hemat dengan kenaikan tarif ${s.esc}%/tahun</td><td style="text-align:right">${pbT(s.pb)}</td></tr></table>
+<h4>Asumsi</h4><ul style="font-size:13px"><li>Tagihan listrik ${fmt(s.bill)}/bulan, tarif PLN ${fmt(s.tariff)}/kWh.</li><li>Estimasi penghematan ${s.pct}% = ${fmt(s.mon)}/bulan (${fmt(s.mon*12)} tahun pertama).</li><li>Kenaikan tarif listrik ${s.esc}% per tahun; payback dihitung dari akumulasi penghematan tahunan.</li><li>Sistem: ${esc(s.type)}, ${s.pq} panel × ${s.wp} Wp.</li></ul>
+<h4>Syarat &amp; Ketentuan</h4><p style="font-size:13px">${esc(S.set.terms)}</p><p style="font-size:12px;color:#666;border-top:1px solid #ccc;padding-top:6px">${esc(S.set.co)} · ${s.no} · ${s.date}${S.set.foot?' · '+esc(S.set.foot):''}</p></div>`}
+function proj(){$('#m').innerHTML=`<div class="card"><b>Riwayat Proyek</b><div class="w"><table><tr><th>ID</th><th>Proyek</th><th>Customer</th><th>Investasi</th><th>Status</th><th></th></tr>${S.projects.map((p,i)=>`<tr><td>${p.id}</td><td>${esc(p.name)}</td><td>${esc(p.cust)}</td><td>${fmt(p.snap?.inv)}</td><td><select onchange="S.projects[${i}].status=this.value;save()">${['Draft','Quotation Created','Sent to Customer','Approved','Rejected'].map(s=>`<option ${s===p.status?'selected':''}>${s}</option>`)}</select></td><td style="white-space:nowrap"><button class="s" onclick="C=JSON.parse(JSON.stringify(S.projects[${i}]));mode=C.mode;$('#mode').value=mode;view('calc')">Buka</button> <button class="s" onclick="qv(${i})">Penawaran</button> <button class="s" onclick="dup(${i})">Duplikat</button> <button class="s" onclick="if(confirm('Hapus proyek?')){S.projects.splice(${i},1);save();proj()}">Hapus</button></td></tr>`).join('')}</table></div>${S.projects.length?'':'<p class="mut">Belum ada proyek tersimpan.</p>'}</div>`}
+function dup(i){const o=JSON.parse(JSON.stringify(S.projects[i]));o.id='PRJ-'+String(++S.seq).padStart(3,'0');o.name+=' (salinan)';o.status='Draft';delete o.snap;delete o.qno;S.projects.push(o);save();proj()}
+function man(){const st=S.set,sf=(k,l,t='number')=>`<div><label>${l}</label><input type="${t}" value="${esc(st[k])}" onchange="S.set['${k}']=this.type==='number'?Math.max(0,+this.value):this.value;save()"></div>`;
+$('#m').innerHTML=`<div class="card"><b>Pengaturan</b><div class="f" style="margin-top:8px">${sf('inst','Tarif instalasi (Rp/Wp)')}${sf('str','Tarif struktur (Rp/Wp)')}${sf('tariff','Tarif listrik (Rp/kWh)')}${sf('esc','Kenaikan tarif (%/tahun)')}${sf('wp','Watt panel default')}${sf('disc','Diskon default (Rp)')}${sf('co','Nama perusahaan (branding)','text')}${sf('coaddr','Alamat perusahaan (PDF)','text')}${sf('cophone','Telepon perusahaan (PDF)','text')}${sf('foot','Teks footer PDF','text')}${sf('mg','Margin default (%)')}${sf('cur','Simbol mata uang','text')}${sf('loc','Format angka (id-ID / en-US)','text')}<div><label>Logo (PDF)</label><input type="file" accept="image/*" onchange="lg(this)"></div></div><label style="margin-top:8px">Syarat &amp; ketentuan</label><textarea rows="3" onchange="S.set.terms=this.value;save()">${esc(st.terms)}</textarea></div>
+<div class="card"><b>Tambah Produk</b><div class="f" style="margin:8px 0"><input id="nk" placeholder="SKU"><input id="nn" placeholder="Nama"><input id="nc" placeholder="Kategori"><input id="n1" type="number" placeholder="Harga B2B (Rp)"><input id="n2" type="number" placeholder="Harga B2C (Rp)"></div><button class="b" onclick="addP()">Tambah Produk</button></div>
+<div class="card"><b>Produk (${S.products.length})</b> <span class="mut">Kosong = Price Not Available. Harga lama di penawaran tersimpan tidak berubah.</span><div class="w"><table><tr><th>SKU</th><th>Nama</th><th>B2B</th><th>B2C</th><th>Modal</th><th>Custom</th><th>Aktif</th><th></th></tr>${S.products.map((p,i)=>`<tr><td>${esc(p.sku)}</td><td><input value="${esc(p.name)}" onchange="S.products[${i}].name=this.value;save()"></td>${['b2b','b2c','cost','custom'].map(k=>`<td><input type="number" min="0" value="${p[k]??''}" onchange="setP(${i},'${k}',this.value)"></td>`).join('')}<td><input type="checkbox" style="width:auto" ${p.active?'checked':''} onchange="S.products[${i}].active=this.checked;save()"></td><td style="white-space:nowrap"><button class="s" onclick="edP(${i})">Edit</button> <button class="s" onclick="dupP(${i})">Duplikat</button> <button class="s" onclick="if(confirm('Hapus produk?')){S.products.splice(${i},1);save();man()}">Hapus</button></td></tr>`).join('')}</table></div></div>${mx()}`}
+function addP(){const k=$('#nk').value.trim();if(!k||!$('#nn').value||P(k))return alert('SKU unik dan nama wajib diisi.');S.products.push({sku:k,name:$('#nn').value,cat:$('#nc').value||'Lainnya',b2b:J($('#n1').value/1e6),b2c:J($('#n2').value/1e6),cost:null,custom:null,active:true});save();man()}
+function dupP(i){const o={...S.products[i]};o.sku+='-COPY';o.name+=' (salinan)';S.products.splice(i+1,0,o);save();man()}
+let WT='cat',tt;
+function work(){const m=$('#m');m.className='wide';m.innerHTML=`<div id="wt"><button id="tc" onclick="setT('cat')">CATALOG</button><button id="tk" onclick="setT('calc')">CALCULATOR<span class="bd" id="nb"></span><span id="tt"></span></button></div><div id="ws" data-t="${WT}"><div id="cl"></div><div id="cr"></div></div>`;cat();rcalc();setT(WT,1)}
+function setT(t,k){WT=t;$('#ws').dataset.t=t;$('#tc').className=t==='cat'?'on':'';$('#tk').className=t==='calc'?'on':'';if(!k)scrollTo(0,0);upd()}
+function setM(x){mode=x;$('#mode').value=x;view(V)}
+function upd(f){const c=calc(),n=C.items.reduce((a,i)=>a+(+i.qty||0),0),h=$('#ht');if(h)h.textContent=C.items.length?fmt(c.inv):'';const b=$('#nb');if(b){b.textContent=n||'';if(f){b.classList.remove('pulse');void b.offsetWidth;b.classList.add('pulse')}}const t=$('#tt');if(t)t.textContent=C.items.length?' · '+fmt(c.inv):''}
+function toast(m){const e=$('#tst');e.textContent=m;e.style.display='block';clearTimeout(tt);tt=setTimeout(()=>e.style.display='none',1400)}
+function setWp(w){C.wp=w;document.querySelector('[data-k=wp]').value=w;tot()}
+function setB(n){if(n<0)return toast('Pilih baterai dari daftar produk');C.items=C.items.filter(i=>P(i.sku)?.cat!=='Baterai');const m={5:['FSI-BAT-5K',1],10:['FSI-BAT-5K',2],15:['FSI-BAT-15K',1]}[n];if(m)C.items.push({sku:m[0],qty:m[1],price:null});if(n>0&&C.type==='Hybrid tanpa Baterai')C.type='Hybrid dengan Baterai';if(n===0&&C.type==='Hybrid dengan Baterai')C.type='Hybrid tanpa Baterai';document.querySelector('[data-k=type]').value=C.type;ritems()}
+function wr(c){const k=c.rows.map(r=>r.c),w=[],t=C.type,b=k.includes('Baterai'),h=k.includes('Inverter Hybrid'),o=k.includes('Inverter On-Grid');if(!h&&!o&&!k.includes('Micro-Inverter'))w.push('Belum ada inverter.');if(t==='On-Grid'&&(h||b))w.push('Tipe On-Grid: hybrid inverter/baterai tidak diperlukan.');if(t.startsWith('Hybrid')&&o)w.push('Tipe Hybrid: inverter On-Grid tidak sesuai.');if(t==='Hybrid tanpa Baterai'&&b)w.push('Tipe tanpa baterai, tetapi ada baterai.');if((t==='Hybrid dengan Baterai'||t==='Off-Grid')&&!b)w.push('Tipe ini membutuhkan baterai.');return w.map(x=>`<p style="color:#b45309;margin:4px 0">⚠ ${x}</p>`).join('')}
+function qv(i){const p=S.projects[i],l=S.qs.filter(x=>x.pid===p.id);if(l.length<2)return p.snap?show(p.snap):alert('Belum ada penawaran.');$('#dlg').innerHTML=`<h3>Penawaran ${esc(p.name)}</h3>${l.map(x=>`<div class="tot"><span>${x.no} · ${fmt(x.snap.inv)}</span><button class="s" onclick="$('#dlg').close();show(S.qs.find(q=>q.no==='${x.no}').snap)">Lihat</button></div>`).join('')}<button class="s" onclick="$('#dlg').close()">Tutup</button>`;$('#dlg').showModal()}
+function setP(i,k,v){const p=S.products[i],n=v===''?null:Math.max(0,+v);if(p[k]!==n){S.ph.push({sku:p.sku,f:k,o:p[k],n,d:new Date().toLocaleDateString('id-ID')});p[k]=n;save()}}
+function rz(f,m,t,cb){const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);cb(c.toDataURL(t,.75))};im.src=r.result};r.readAsDataURL(f)}
+function lg(i){if(i.files[0])rz(i.files[0],300,'image/png',d=>{S.set.logo=d;save();toast('Logo tersimpan')})}
+function edP(i){const p=S.products[i],h=S.ph.filter(x=>x.sku===p.sku).slice(-6).reverse();$('#dlg').innerHTML=`<h3>Edit produk</h3><div class="f" style="grid-template-columns:1fr"><div><label>SKU</label><input id="e1" value="${esc(p.sku)}"></div><div><label>Nama</label><input id="e2" value="${esc(p.name)}"></div><div><label>Kategori</label><input id="e3" list="cl2" value="${esc(p.cat)}"></div><div><label>Spesifikasi</label><input id="e4" value="${esc(p.spec||'')}"></div><div><label>Deskripsi</label><textarea id="e5">${esc(p.desc||'')}</textarea></div><div><label>Ketersediaan</label><select id="e7">${['Tersedia','Pre-order','Habis'].map(x=>`<option ${x===(p.av||'Tersedia')?'selected':''}>${x}</option>`)}</select></div><div><label>Gambar</label><input type="file" accept="image/*" id="e6"></div></div><p class="mut">Riwayat harga:<br>${h.map(x=>`${x.d} ${x.f}: ${x.o??'-'} → ${x.n??'-'}`).join('<br>')||'-'}</p><button class="b" onclick="svP(${i})">Simpan</button> <button class="s" onclick="$('#dlg').close()">Batal</button>`;$('#dlg').showModal()}
+function svP(i){const p=S.products[i],k=$('#e1').value.trim();if(!k||(k!==p.sku&&P(k)))return alert('SKU wajib diisi dan unik.');const fin=img=>{if(img)p.img=img;[C.items,...S.projects.map(q=>q.items)].forEach(a=>a.forEach(t=>{if(t.sku===p.sku)t.sku=k}));p.sku=k;p.name=$('#e2').value;p.cat=$('#e3').value||'Lainnya';p.spec=$('#e4').value;p.desc=$('#e5').value;p.av=$('#e7').value;save();$('#dlg').close();man()};const f=$('#e6').files[0];f?rz(f,320,'image/jpeg',fin):fin()}
+function cats(){return[...new Set([...S.cats,...S.products.map(p=>p.cat)])].sort()}
+function rc(k,v){const o=cats()[k];v=v.trim();if(!v)return;S.products.forEach(p=>{if(p.cat===o)p.cat=v});S.cats=S.cats.map(c=>c===o?v:c);save();man()}
+function dc(k){const o=cats()[k];S.cats=S.cats.filter(c=>c!==o);save();man()}
+function ac(){const v=$('#nc2').value.trim();if(v){S.cats.push(v);save();man()}}
+function mx(){const ca=cats();return`<datalist id="cl2">${ca.map(c=>`<option value="${esc(c)}">`).join('')}</datalist><div class="card"><b>Kategori</b><div class="f" style="margin:8px 0">${ca.map((c,k)=>{const n=S.products.filter(p=>p.cat===c).length;return`<div><label>${n} produk${n?'':` <a href="#" onclick="dc(${k});return false">hapus</a>`}</label><input value="${esc(c)}" onchange="rc(${k},this.value)"></div>`}).join('')}</div><input id="nc2" placeholder="Kategori baru" style="width:60%"> <button class="s" onclick="ac()">Tambah</button></div><div class="card"><b>Backup &amp; Impor</b><p class="mut">Data hanya ada di browser ini. Ekspor, lalu simpan teksnya di tempat aman (catatan, chat ke diri sendiri).</p><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"><button class="s" onclick="bk('all')">Ekspor semua</button><button class="s" onclick="bk('prod')">Ekspor produk</button><button class="b" onclick="ib('all')">Pulihkan semua</button><button class="b" onclick="ib('prod')">Impor produk</button><button class="s" onclick="rs()">Muat ulang katalog awal</button></div><textarea id="bk" rows="5"></textarea></div>`}
+function bk(t){const a=$('#bk');a.value=JSON.stringify(t==='all'?S:S.products);a.select();try{navigator.clipboard.writeText(a.value);toast('Disalin ke clipboard')}catch(e){}}
+function ib(t){try{const d=JSON.parse($('#bk').value);if(t==='all'){if(!d.products||!confirm('Timpa semua data dengan cadangan ini?'))return;S=d}else{if(!Array.isArray(d))throw 0;d.forEach(x=>{if(!x.sku||!x.name)return;const i=S.products.findIndex(p=>p.sku===x.sku);i<0?S.products.push({cost:null,custom:null,active:true,...x}):Object.assign(S.products[i],x)})}S.set={cur:'Rp',loc:'id-ID',mg:25,coaddr:'',cophone:'',foot:'',...S.set};S.qs=S.qs||[];S.ph=S.ph||[];S.cats=S.cats||[];save();toast('Berhasil');man()}catch(e){alert('Data tidak valid.')}}
+function rs(){if(!confirm('Kembalikan produk dan harga bawaan dari Price List 2026? Produk tambahan Anda tetap ada.'))return;seed().forEach(x=>{const i=S.products.findIndex(p=>p.sku===x.sku);i<0?S.products.push(x):Object.assign(S.products[i],{b2b:x.b2b,b2c:x.b2c,name:x.name,cat:x.cat})});save();toast('Katalog dimuat ulang');man()}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script src="sync.js"></script></body></html>
